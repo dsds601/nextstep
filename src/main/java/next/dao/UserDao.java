@@ -1,9 +1,6 @@
 package next.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,28 +8,28 @@ import core.jdbc.ConnectionManager;
 import next.model.User;
 
 public class UserDao {
-    public void insert(User user) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
+
+    public Connection getConnection() {
+        String url = "jdbc:mysql://localhost:3306/slipp_dev";
+        String id = "root";
+        String pw = "12345";
         try {
-            con = ConnectionManager.getConnection();
-            String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
-            pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, user.getUserId());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getName());
-            pstmt.setString(4, user.getEmail());
-
-            pstmt.executeUpdate();
-        } finally {
-            if (pstmt != null) {
-                pstmt.close();
-            }
-
-            if (con != null) {
-                con.close();
-            }
+            Class.forName("com.mysql.jdbc.Driver");
+            return DriverManager.getConnection(url, id, pw);
+        } catch (Exception e) {
+            System.out.println("e.getMessage() = " + e.getMessage());
+            return null;
         }
+    }
+
+    public void insert(User user) throws SQLException {
+        String sql = "insert into USERS values (?,?,?,?)";
+        PreparedStatement pstmt = getConnection().prepareStatement(sql); // 쿼리문 정상적인지 확인
+        pstmt.setString(1,user.getUserId()); // 인덱스는 1부터 시작한다.
+        pstmt.setString(2,user.getPassword());
+        pstmt.setString(3,user.getName());
+        pstmt.setString(4,user.getEmail());
+        pstmt.executeUpdate(); // 쿼리 실행
     }
 
     public void update(User user) throws SQLException {
